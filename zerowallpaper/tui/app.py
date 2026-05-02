@@ -45,6 +45,7 @@ class ZeroWallpaperApp(App):
     BINDINGS = [
         Binding("q", "quit", "Quit", show=False),
         Binding("slash", "focus_search", "Search", show=False),
+        Binding("s", "set_wallpaper", "Set Wallpaper", show=False),
         Binding("r", "random_wallpaper", "Random", show=False),
         Binding("a", "toggle_auto", "Auto Mode", show=False),
         Binding("f", "toggle_favorite", "Favorite", show=False),
@@ -240,11 +241,17 @@ class ZeroWallpaperApp(App):
         )
 
     def on_wallpaper_activated(self, event: WallpaperActivated) -> None:
-        """Handle wallpaper activation — set as wallpaper."""
-        self.run_worker(
-            self._set_wallpaper(event.wallpaper),
-            exclusive=False,
-            name="set_wallpaper",
+        """Handle wallpaper activation (Enter) — preview only, don't set."""
+        # Enter just ensures preview is loaded (same as highlight)
+        if self._preview_task and not self._preview_task.done():
+            self._preview_task.cancel()
+        self._preview_task = asyncio.create_task(
+            self._load_preview(event.wallpaper)
+        )
+        self.notify(
+            "Press 's' to set as wallpaper",
+            title=event.wallpaper["filename"],
+            severity="information",
         )
 
     async def _load_preview(self, wallpaper: dict[str, Any]) -> None:
@@ -341,6 +348,19 @@ class ZeroWallpaperApp(App):
         """Focus the search bar."""
         sb = self.query_one("#search-bar", SearchBar)
         sb.focus_input()
+
+    def action_set_wallpaper(self) -> None:
+        """Set the currently selected wallpaper (s key)."""
+        wl = self.query_one("#wallpaper-list-container", WallpaperList)
+        wp = wl.get_current_wallpaper()
+        if wp:
+            self.run_worker(
+                self._set_wallpaper(wp),
+                exclusive=False,
+                name="set_wallpaper",
+            )
+        else:
+            self.notify("No wallpaper selected", severity="warning")
 
     def action_random_wallpaper(self) -> None:
         """Set a random wallpaper from current list."""

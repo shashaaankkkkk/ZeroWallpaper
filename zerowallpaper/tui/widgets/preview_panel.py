@@ -61,21 +61,21 @@ class HalfBlockImage:
 
             img = img.convert("RGB")
 
-            # Height in pixels is 2x character height (2 pixels per char)
+            # Height in pixels is 2x character height (2 pixels per char row)
             pixel_h = self.height * 2
             pixel_w = self.width
 
-            # Terminal chars are roughly 2x taller than wide, so adjust aspect
-            char_aspect = 0.5  # each char cell is ~1:2 (w:h)
+            # With half-block rendering (▀), each char cell displays 2 vertical
+            # pixels. Since char cells are ~2x tall as wide, and we pack 2 pixels
+            # vertically, the effective pixel aspect is 1:1 — no correction needed.
             img_aspect = img.width / img.height
-            effective_aspect = img_aspect / char_aspect
 
-            if effective_aspect > (pixel_w / pixel_h):
-                # Image is wider — fit to width
-                pixel_h = int(pixel_w / effective_aspect)
+            if (pixel_w / pixel_h) > img_aspect:
+                # Available area is wider than image — fit to height
+                pixel_w = int(pixel_h * img_aspect)
             else:
-                # Image is taller — fit to height
-                pixel_w = int(pixel_h * effective_aspect)
+                # Available area is taller than image — fit to width
+                pixel_h = int(pixel_w / img_aspect)
 
             pixel_h = max(2, pixel_h - (pixel_h % 2))  # Ensure even
             pixel_w = max(1, pixel_w)

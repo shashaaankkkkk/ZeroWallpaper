@@ -31,7 +31,8 @@ zerowallpaper
 | Key | Action |
 |-----|--------|
 | `↑↓` / `j k` | Navigate wallpapers |
-| `Enter` | Set wallpaper |
+| `Enter` | Preview wallpaper |
+| `s` | Set wallpaper |
 | `/` | Focus search |
 | `Tab` | Switch panels |
 | `r` | Random wallpaper |

@@ -40,6 +40,11 @@ SearchBar {
     border: none;
 }
 
+#search-container:focus-within {
+    background: #2d1b69;
+    border-left: tall #a855f7;
+}
+
 #result-count {
     width: auto;
     min-width: 16;
@@ -100,6 +105,12 @@ SearchBar {
     background: #7c3aed30;
     color: #a855f7;
     text-style: bold;
+}
+
+/* Ensure tag list takes up full height */
+#tag-list {
+    height: 1fr;
+    scrollbar-size: 1 1;
 }
 
 /* ===== WALLPAPER LIST ===== */
@@ -213,6 +224,71 @@ ListView:focus > ListItem.-highlight .wp-tags {
 .meta-tags {
     color: #c4b5fd;
 }
+
+/* ===== HOME SCREEN MODAL ===== */
+
+HomeScreen {
+    align: center middle;
+    background: #0a0a0f;
+}
+
+#home-container {
+    width: 60;
+    height: auto;
+    padding: 2 4;
+    align: center middle;
+}
+
+#home-title {
+    text-align: center;
+    color: #06b6d4;
+    text-style: bold;
+    width: 100%;
+    margin-bottom: 1;
+}
+
+.home-subtitle {
+    text-align: center;
+    color: #e4e4e7;
+    width: 100%;
+}
+
+.home-link {
+    text-align: center;
+    color: #a855f7;
+    width: 100%;
+    margin-bottom: 2;
+}
+
+#home-buttons {
+    width: 100%;
+    height: auto;
+    align: center middle;
+    layout: vertical;
+}
+
+#home-buttons > Button {
+    width: 100%;
+    margin-bottom: 1;
+    border-left: tall transparent;
+}
+
+#home-buttons > Button:focus {
+    background: #2d1b69;
+    border-left: tall #a855f7;
+    color: #ffffff;
+    text-style: none;
+}
+
+#btn_explore {
+    background: #7c3aed;
+    color: white;
+}
+
+#btn_explore:hover {
+    background: #9333ea;
+}
+
 
 /* ===== STATUS BAR ===== */
 

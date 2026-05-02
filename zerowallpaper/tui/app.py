@@ -30,6 +30,7 @@ from zerowallpaper.tui.widgets.wallpaper_list import (
     WallpaperSelected,
     WallpaperActivated,
 )
+from zerowallpaper.tui.screens import HomeScreen
 
 
 CSS_PATH = Path(__file__).parent / "styles.tcss"
@@ -52,6 +53,9 @@ class ZeroWallpaperApp(App):
         Binding("f", "toggle_favorite", "Favorite", show=False),
         Binding("tab", "cycle_focus", "Switch Panel", show=False),
         Binding("R", "refresh_index", "Refresh", show=False),
+        Binding("E", "nav_explore", "Explore", show=False),
+        Binding("C", "nav_cached", "Cached", show=False),
+        Binding("F", "nav_favorites", "Favorites", show=False),
     ]
 
     def __init__(
@@ -97,6 +101,9 @@ class ZeroWallpaperApp(App):
 
     async def on_mount(self) -> None:
         """Initialize the app after mounting."""
+        # Show the Home Screen immediately
+        self.push_screen(HomeScreen())
+        
         self._auto_changer.set_callback(self._auto_change_wallpaper)
 
         # Show loading state
@@ -171,6 +178,11 @@ class ZeroWallpaperApp(App):
             results = [
                 w for w in self._search.all_wallpapers
                 if w["filename"] in fav_files
+            ]
+        elif self._special_filter == "cached":
+            results = [
+                w for w in self._search.all_wallpapers
+                if self._cache.is_wallpaper_cached(w["filename"])
             ]
         elif self._special_filter == "recent":
             recent_files = self._history.get_recent(50)
@@ -363,6 +375,30 @@ class ZeroWallpaperApp(App):
             )
         else:
             self.notify("No wallpaper selected", severity="warning")
+
+    def action_nav_explore(self) -> None:
+        """Navigate to All/Explore view via shortcut."""
+        from zerowallpaper.tui.widgets.tag_sidebar import SpecialFilterItem
+        try:
+            self.query_one("#filter-all", SpecialFilterItem).on_click()
+        except Exception:
+            pass
+
+    def action_nav_cached(self) -> None:
+        """Navigate to Cached view via shortcut."""
+        from zerowallpaper.tui.widgets.tag_sidebar import SpecialFilterItem
+        try:
+            self.query_one("#filter-cached", SpecialFilterItem).on_click()
+        except Exception:
+            pass
+
+    def action_nav_favorites(self) -> None:
+        """Navigate to Favorites view via shortcut."""
+        from zerowallpaper.tui.widgets.tag_sidebar import SpecialFilterItem
+        try:
+            self.query_one("#filter-fav", SpecialFilterItem).on_click()
+        except Exception:
+            pass
 
     def action_view_image(self) -> None:
         """View the high-resolution image using macOS QuickLook."""

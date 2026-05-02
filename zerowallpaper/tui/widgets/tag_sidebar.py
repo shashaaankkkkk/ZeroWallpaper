@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from textual.app import ComposeResult
-from textual.containers import Vertical, VerticalScroll
+from textual.containers import Vertical
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Static, Label
+from textual.widgets import Static, Label, ListView, ListItem
 
 
 class TagFilterChanged(Message):
@@ -19,7 +19,7 @@ class TagFilterChanged(Message):
         self.special_filter = special_filter  # "all", "favorites", "recent"
 
 
-class TagItem(Static):
+class TagItem(ListItem):
     """A single tag item in the sidebar."""
 
     selected = reactive(False)
@@ -30,33 +30,26 @@ class TagItem(Static):
         self.tag_count = count
         self.add_class("tag-item")
 
-    def render(self) -> str:
+    def compose(self) -> ComposeResult:
+        yield Label(self._get_label_text())
+
+    def _get_label_text(self) -> str:
         marker = "●" if self.selected else "○"
         count_str = f" ({self.tag_count})" if self.tag_count > 0 else ""
         return f" {marker} {self.tag_name}{count_str}"
 
     def watch_selected(self, value: bool) -> None:
+        try:
+            self.query_one(Label).update(self._get_label_text())
+        except Exception:
+            pass
         if value:
             self.add_class("--selected")
         else:
             self.remove_class("--selected")
 
-    def on_click(self) -> None:
-        self.selected = not self.selected
-        self.post_message(TagFilterChanged(
-            active_tags=self._get_parent_active_tags(),
-        ))
 
-    def _get_parent_active_tags(self) -> list[str]:
-        """Collect all active tags from sibling items."""
-        sidebar = self.ancestors_with_self
-        for ancestor in sidebar:
-            if isinstance(ancestor, TagSidebar):
-                return ancestor.get_active_tags()
-        return []
-
-
-class SpecialFilterItem(Static):
+class SpecialFilterItem(ListItem):
     """Special filter items like All, Favorites, Recent."""
 
     selected = reactive(False)
@@ -68,34 +61,22 @@ class SpecialFilterItem(Static):
         self.filter_key = filter_key
         self.add_class("tag-item")
 
-    def render(self) -> str:
+    def compose(self) -> ComposeResult:
+        yield Label(self._get_label_text())
+
+    def _get_label_text(self) -> str:
         marker = "▸" if self.selected else " "
         return f" {marker} {self.icon} {self.filter_label}"
 
     def watch_selected(self, value: bool) -> None:
+        try:
+            self.query_one(Label).update(self._get_label_text())
+        except Exception:
+            pass
         if value:
             self.add_class("--selected")
         else:
             self.remove_class("--selected")
-
-    def on_click(self) -> None:
-        # Deselect other special filters
-        sidebar = None
-        for ancestor in self.ancestors_with_self:
-            if isinstance(ancestor, TagSidebar):
-                sidebar = ancestor
-                break
-
-        if sidebar:
-            for child in sidebar.query(SpecialFilterItem):
-                child.selected = False
-            self.selected = True
-            sidebar.clear_tag_selection()
-
-            self.post_message(TagFilterChanged(
-                active_tags=[],
-                special_filter=self.filter_key,
-            ))
 
 
 class TagSidebar(Widget):
@@ -107,16 +88,15 @@ class TagSidebar(Widget):
 
     def compose(self) -> ComposeResult:
         yield Static(" ⬡ FILTERS", classes="sidebar-title")
-        with VerticalScroll():
+        with ListView(id="tag-list"):
             # Special filters
             yield SpecialFilterItem("All", "◈", "all", id="filter-all")
             yield SpecialFilterItem("Favorites", "★", "favorites", id="filter-fav")
+            yield SpecialFilterItem("Cached", "💾", "cached", id="filter-cached")
             yield SpecialFilterItem("Recent", "◷", "recent", id="filter-recent")
 
-            yield Static(" ─── TAGS ───", classes="tag-section-header")
-
-            # Tag items will be added dynamically
-            yield Vertical(id="tag-list")
+            # Header is just a disabled list item
+            yield ListItem(Static(" ─── TAGS ───", classes="tag-section-header"), disabled=True)
 
     def on_mount(self) -> None:
         # Select "All" by default
@@ -125,14 +105,43 @@ class TagSidebar(Widget):
 
     def set_tags(self, tags: dict[str, int]) -> None:
         """Populate tags in the sidebar."""
-        tag_list = self.query_one("#tag-list", Vertical)
-        tag_list.remove_children()
+        tag_list = self.query_one("#tag-list", ListView)
+        
+        # Remove existing tags (but keep special filters and header)
+        for item in tag_list.query(TagItem):
+            item.remove()
 
         self._tag_items = []
         for tag_name, count in tags.items():
             item = TagItem(tag_name, count)
             self._tag_items.append(item)
-            tag_list.mount(item)
+            tag_list.append(item)
+
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        """Handle keyboard or mouse selection of sidebar items."""
+        item = event.item
+        if isinstance(item, SpecialFilterItem):
+            # Clear tags
+            self.clear_tag_selection()
+            # Clear other special filters
+            self.clear_special_selection()
+            item.selected = True
+
+            self.post_message(TagFilterChanged(
+                active_tags=[],
+                special_filter=item.filter_key,
+            ))
+        elif isinstance(item, TagItem):
+            # Toggle this tag
+            item.selected = not item.selected
+            
+            # Clear special filters visually
+            self.clear_special_selection()
+
+            self.post_message(TagFilterChanged(
+                active_tags=self.get_active_tags(),
+                special_filter="",
+            ))
 
     def get_active_tags(self) -> list[str]:
         """Get list of currently selected tags."""

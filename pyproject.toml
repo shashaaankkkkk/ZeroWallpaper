@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "zerowallpaper"
-version = "1.0.2"
+version = "1.1.0"
 description = "A premium terminal wallpaper browser and manager"
 readme = "README.md"
 license = "MIT"

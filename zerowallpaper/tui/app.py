@@ -386,8 +386,19 @@ class ZeroWallpaperApp(App):
             
         if wp_path:
             import subprocess
-            subprocess.Popen(["qlmanage", "-p", str(wp_path)], 
-                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            import sys
+            import os
+            try:
+                if sys.platform == "win32":
+                    os.startfile(wp_path)
+                elif sys.platform == "darwin":
+                    subprocess.Popen(["open", str(wp_path)], 
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                else:
+                    subprocess.Popen(["xdg-open", str(wp_path)], 
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            except Exception as e:
+                self.notify(f"Failed to open image: {e}", severity="error")
         else:
             self.notify("Please wait for preview to download first", severity="warning")
 

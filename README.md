@@ -33,9 +33,9 @@
 
 <div align="center">
   <p><strong>Experience the fluid UI and high-fidelity rendering</strong></p>
-  <img src="assets/app.png" alt="Main Interface" width="100%" style="border-radius: 10px; border: 2px solid #2d1b69;" />
-  <br />
   <img src="assets/homescreen.png" alt="Splash Screen" width="100%" style="border-radius: 10px; border: 2px solid #2d1b69; margin-top: 10px;" />
+  <br />
+  <img src="assets/app.png" alt="Main Interface" width="100%" style="border-radius: 10px; border: 2px solid #2d1b69;" />
 </div>
 
 ---

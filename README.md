@@ -1,95 +1,104 @@
 <div align="center">
+  <img src="assets/homescreen.png" alt="ZeroWallpaper Logo" width="200" />
   <h1 align="center">ZeroWallpaper 🌌</h1>
   <p align="center">
-    <strong>A premium, ultra-fast terminal wallpaper browser & manager built for modern aesthetics.</strong>
+    <strong>The ultimate terminal-based aesthetic wallpaper engine.</strong>
   </p>
+
   <p align="center">
-    <a href="https://github.com/shashaaankkkkk/zerowallpaper/blob/main/LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=2d1b69" alt="License" />
-    </a>
-    <a href="https://pypi.org/project/zerowallpaper/">
-      <img src="https://img.shields.io/badge/Python-3.10+-blue.svg?style=for-the-badge&color=a855f7&logo=python&logoColor=white" alt="Python Version" />
-    </a>
-    <a href="https://textual.textualize.io/">
-      <img src="https://img.shields.io/badge/Built_with-Textual-blue.svg?style=for-the-badge&color=06b6d4" alt="Built with Textual" />
-    </a>
+    <a href="https://github.com/shashaaankkkkk/zerowallpaper/stargazers"><img src="https://img.shields.io/github/stars/shashaaankkkkk/zerowallpaper?style=for-the-badge&color=2d1b69&logo=github" alt="Stars" /></a>
+    <a href="https://pypi.org/project/zerowallpaper/"><img src="https://img.shields.io/pypi/v/zerowallpaper?style=for-the-badge&color=a855f7&logo=pypi&logoColor=white" alt="PyPI Version" /></a>
+    <a href="https://github.com/shashaaankkkkk/zerowallpaper/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge&color=06b6d4" alt="License" /></a>
+  </p>
+
+  <p align="center">
+    <a href="#✨-features">Features</a> •
+    <a href="#📦-installation">Installation</a> •
+    <a href="#⌨️-usage">Usage</a> •
+    <a href="#⚙️-configuration">Configuration</a>
   </p>
 </div>
 
 <br />
 
+---
+
+## 🖼️ Gallery
+
 <div align="center">
-  <img src="assets/app.png" alt="ZeroWallpaper Main Application" width="48%" style="border-radius: 8px; margin-right: 2%;" />
-  <img src="assets/homescreen.png" alt="ZeroWallpaper Home Screen" width="48%" style="border-radius: 8px;" />
+  <p><strong>Experience the fluid UI and high-fidelity rendering</strong></p>
+  <img src="assets/app.png" alt="Main Interface" width="100%" style="border-radius: 10px; border: 2px solid #2d1b69;" />
+  <br />
+  <img src="assets/homescreen.png" alt="Splash Screen" width="100%" style="border-radius: 10px; border: 2px solid #2d1b69; margin-top: 10px;" />
 </div>
 
 ---
 
-**ZeroWallpaper** brings the beauty of high-quality desktop customization directly into your terminal. Powered by the incredible aesthetic collections from [D3Ext/aesthetic-wallpapers](https://github.com/D3Ext/aesthetic-wallpapers), it allows you to instantly browse, preview, and apply wallpapers without ever leaving your command line.
-
 ## ✨ Features
 
-- 🚀 **Remote-First Architecture**: Instantly streams wallpapers directly from GitHub without the need to clone massive repositories locally.
-- 🎨 **High-Fidelity Terminal Rendering**: Uses a state-of-the-art fallback pipeline (`Sixel` → `Chafa` → `Half-Blocks`) to render ultra-high-definition image previews directly inside modern terminals (Kitty, WezTerm, iTerm2, VSCode).
-- 🧠 **Smart Tag Navigation**: Explore wallpapers through an intuitive sidebar. Combine tags seamlessly to find exactly the aesthetic you want.
-- ⚡ **Lightning Fast Interface**: Built entirely on [Textual](https://textual.textualize.io/), featuring fluid 60FPS animations, a gorgeous dark mode UI, and instant filtering.
-- 🔄 **Auto-Changer**: Set it and forget it. Configurable background daemon to rotate your wallpapers automatically.
-- 💖 **Favorites & Caching**: Save wallpapers to your favorites list and rely on the intelligent local cache for blazing fast repeat loads.
+- 🌌 **Aesthetic-First**: Curated wallpapers from the best sources on GitHub.
+- 🚀 **Streamed, Not Cloned**: Zero local storage bloat. We stream only what you want to see.
+- 🖥️ **High-Fidelity Rendering**: Native support for **Kitty**, **WezTerm**, and **iTerm2** with Chafa fallback.
+- ⚡ **Turbo Filtering**: Instantly search by tags, name, or category with real-time updates.
+- 💖 **Native Favorites**: Keep your favorite aesthetics just one keystroke away.
+- 🔄 **Smart Auto-Changer**: A lightweight background daemon that keeps your desktop fresh.
+- 🎹 **Keyboard Focused**: Designed for power users. No mouse required, but fully supported.
 
 ## 📦 Installation
 
-ZeroWallpaper is available via `pip`. Ensure you are using Python 3.10 or newer.
+ZeroWallpaper is just a pip command away:
 
 ```bash
 pip install zerowallpaper
 ```
 
-*(Optional but highly recommended)*: Install `chafa` on your system for drastically improved image rendering quality. 
-- macOS: `brew install chafa`
-- Linux: `sudo apt install chafa`
+> [!TIP]
+> For the best visual experience, install **chafa** on your system:
+> `brew install chafa` (macOS) or `sudo apt install chafa` (Linux).
 
 ## ⌨️ Usage
 
-Simply launch the interactive TUI from your terminal:
+Launch the engine:
 
 ```bash
 zerowallpaper
 ```
 
-### Keyboard Navigation
-
-ZeroWallpaper is designed to be completely keyboard-driven. Navigate fluidly without ever touching your mouse:
+### 🎮 Controls
 
 | Key | Action |
 | :--- | :--- |
-| <kbd>↑</kbd> / <kbd>↓</kbd> | Navigate wallpapers and menus |
-| <kbd>Enter</kbd> | Select / Preview a wallpaper |
-| <kbd>Double-Click</kbd> | View high-resolution image in standard image viewer |
-| <kbd>s</kbd> | **Set wallpaper** as your current desktop background |
-| <kbd>Shift</kbd> + <kbd>E</kbd> | Instantly jump to the **Explore** panel |
-| <kbd>Shift</kbd> + <kbd>C</kbd> | Instantly jump to your **Cached** wallpapers |
-| <kbd>Shift</kbd> + <kbd>F</kbd> | Instantly jump to your **Favorites** |
-| <kbd>f</kbd> | Toggle Favorite status on the current wallpaper |
-| <kbd>a</kbd> | Toggle auto-change wallpaper daemon |
-| <kbd>/</kbd> | Focus the search bar |
-| <kbd>Tab</kbd> | Cycle keyboard focus between UI panels |
-| <kbd>q</kbd> | Quit the application |
+| <kbd>↑</kbd> <kbd>↓</kbd> | Navigate wallpapers |
+| <kbd>Enter</kbd> | Preview wallpaper |
+| <kbd>s</kbd> | **Set wallpaper** |
+| <kbd>Shift</kbd> + <kbd>E</kbd> | **Explore** All |
+| <kbd>Shift</kbd> + <kbd>C</kbd> | View **Cached** |
+| <kbd>Shift</kbd> + <kbd>F</kbd> | View **Favorites** |
+| <kbd>f</kbd> | Toggle Favorite |
+| <kbd>a</kbd> | Toggle Auto-changer |
+| <kbd>/</kbd> | Search |
+| <kbd>Tab</kbd> | Cycle panels |
+| <kbd>q</kbd> | Exit |
 
 ## ⚙️ Configuration
 
-ZeroWallpaper works perfectly out of the box. All local configurations and image caches are cleanly managed and stored at:
-`~/.zerowallpaper/config.json`
+ZeroWallpaper keeps things simple. Your config and cache live at `~/.zerowallpaper/`.
 
-**API Rate Limits**: Because ZeroWallpaper fetches directly from GitHub, heavy usage might hit GitHub's unauthenticated API rate limits. To prevent this, you can set a GitHub token:
+### 🔑 GitHub Token (Optional)
+
+To avoid GitHub's unauthenticated rate limits, set a personal access token:
+
 ```bash
-export GITHUB_TOKEN="your_personal_access_token_here"
+export GITHUB_TOKEN="ghp_your_token_here"
 ```
 
-## 🤝 Contributing
+## 📜 License
 
-Contributions, issues, and feature requests are always welcome! Feel free to check the [issues page](https://github.com/shashaaankkkkk/zerowallpaper/issues).
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ---
+
 <div align="center">
-  <i>Made with love by <a href="https://github.com/shashaaankkkkk">@shashaaankkkkk</a></i>
+  <p>Built with 💜 by <a href="https://github.com/shashaaankkkkk">@shashaaankkkkk</a></p>
+  <p><i>Making the terminal beautiful, one wallpaper at a time.</i></p>
 </div>

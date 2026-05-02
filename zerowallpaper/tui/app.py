@@ -128,6 +128,10 @@ class ZeroWallpaperApp(App):
                 title="Index Ready",
                 severity="information",
             )
+            
+            # Focus the wallpaper list automatically
+            wl = self.query_one("#wallpaper-list-container", WallpaperList)
+            wl.focus_list()
 
         except RateLimitError as e:
             self.notify(str(e), title="Rate Limited", severity="error")
@@ -233,24 +237,26 @@ class ZeroWallpaperApp(App):
         self._apply_filters()
 
     def on_wallpaper_selected(self, event: WallpaperSelected) -> None:
-        """Handle wallpaper highlight — load preview."""
+        """Handle wallpaper highlight to update preview."""
+        wp = event.wallpaper
+        filename = wp["filename"]
+        
         if self._preview_task and not self._preview_task.done():
             self._preview_task.cancel()
 
+        # Instantly clear the old preview if not cached
+        if not self._cache.is_thumbnail_cached(filename) and not self._cache.is_wallpaper_cached(filename):
+            self.query_one("#preview-panel", PreviewPanel).show_loading()
+
         self._preview_task = asyncio.create_task(
-            self._load_preview(event.wallpaper)
+            self._load_preview(wp)
         )
 
     def on_wallpaper_activated(self, event: WallpaperActivated) -> None:
-        """Handle wallpaper activation (Enter) — preview only, don't set."""
-        # Enter just ensures preview is loaded (same as highlight)
-        if self._preview_task and not self._preview_task.done():
-            self._preview_task.cancel()
-        self._preview_task = asyncio.create_task(
-            self._load_preview(event.wallpaper)
-        )
+        """Handle wallpaper activation (Enter) — open HD image preview."""
+        self.action_view_image()
         self.notify(
-            "Press 's' to set as wallpaper",
+            "Press 's' to set as desktop wallpaper",
             title=event.wallpaper["filename"],
             severity="information",
         )
@@ -371,8 +377,14 @@ class ZeroWallpaperApp(App):
             return
             
         filename = wp["filename"]
+        
+        wp_path = None
         if self._cache.is_wallpaper_cached(filename):
             wp_path = self._cache.get_wallpaper_path(filename)
+        elif self._cache.is_thumbnail_cached(filename):
+            wp_path = self._cache.get_thumbnail_path(filename)
+            
+        if wp_path:
             import subprocess
             subprocess.Popen(["qlmanage", "-p", str(wp_path)], 
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

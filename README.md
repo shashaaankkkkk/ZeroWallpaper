@@ -33,6 +33,7 @@ zerowallpaper
 | `↑↓` / `j k` | Navigate wallpapers |
 | `Enter` | Preview wallpaper |
 | `s` | Set wallpaper |
+| `v` | View HD image popup |
 | `/` | Focus search |
 | `Tab` | Switch panels |
 | `r` | Random wallpaper |

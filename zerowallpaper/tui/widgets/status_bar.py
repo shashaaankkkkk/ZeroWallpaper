@@ -57,8 +57,8 @@ class StatusBar(Widget):
 
             shortcuts = self.query_one("#status-shortcuts", Static)
             shortcuts.update(
-                "↑↓:nav  s:set  /:search  r:random  "
-                "a:auto  f:fav  Tab:panel  q:quit "
+                "↑↓:nav  s:set  v:view  /:search  "
+                "r:random  a:auto  Tab:panel  q:quit"
             )
         except Exception:
             pass

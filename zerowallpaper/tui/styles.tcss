@@ -146,30 +146,30 @@ SearchBar {
 ListView > ListItem {
     background: transparent;
     color: #a1a1aa;
-    padding: 0;
+    padding: 0 1;
 }
 
 ListView > ListItem:hover {
     background: #1e1e2e;
 }
 
-ListView > ListItem.--highlight {
-    background: #1e1e2e;
-    color: #e4e4e7;
-}
-
-ListView:focus > ListItem.--highlight {
+ListView > ListItem.-highlight {
     background: #252540;
-    color: #e4e4e7;
-    outline: solid #a855f7;
-}
-
-ListView:focus > ListItem.--highlight .wp-name {
     color: #ffffff;
 }
 
-ListView:focus > ListItem.--highlight .wp-tags {
-    color: #a1a1aa;
+ListView > ListItem.-highlight .wp-tags {
+    color: #c4b5fd;
+}
+
+ListView:focus > ListItem.-highlight {
+    background: #2d1b69;
+    color: #ffffff;
+    border-left: tall #a855f7;
+}
+
+ListView:focus > ListItem.-highlight .wp-tags {
+    color: #e9d5ff;
 }
 
 /* ===== PREVIEW PANEL ===== */

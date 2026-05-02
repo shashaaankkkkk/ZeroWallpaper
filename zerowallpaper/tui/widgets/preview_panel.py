@@ -128,6 +128,11 @@ class PreviewPanel(Widget):
         self._current_wp: dict[str, Any] | None = None
         self._loading = False
 
+    async def on_click(self) -> None:
+        """Open the image when the preview panel is clicked."""
+        if self._current_wp:
+            self.app.action_view_image()
+
     def compose(self) -> ComposeResult:
         yield Static(" ◉ PREVIEW", classes="panel-title")
         yield Vertical(id="preview-image-container")

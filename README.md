@@ -17,7 +17,7 @@ Browse, preview, and apply aesthetic wallpapers from [D3Ext/aesthetic-wallpapers
 ## Installation
 
 ```bash
-pip install -e .
+pip install  zerowallpaper
 ```
 
 ## Usage

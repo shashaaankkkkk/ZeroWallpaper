@@ -46,6 +46,7 @@ class ZeroWallpaperApp(App):
         Binding("q", "quit", "Quit", show=False),
         Binding("slash", "focus_search", "Search", show=False),
         Binding("s", "set_wallpaper", "Set Wallpaper", show=False),
+        Binding("v", "view_image", "View HD Image", show=False),
         Binding("r", "random_wallpaper", "Random", show=False),
         Binding("a", "toggle_auto", "Auto Mode", show=False),
         Binding("f", "toggle_favorite", "Favorite", show=False),
@@ -361,6 +362,22 @@ class ZeroWallpaperApp(App):
             )
         else:
             self.notify("No wallpaper selected", severity="warning")
+
+    def action_view_image(self) -> None:
+        """View the high-resolution image using macOS QuickLook."""
+        wl = self.query_one("#wallpaper-list-container", WallpaperList)
+        wp = wl.get_current_wallpaper()
+        if not wp:
+            return
+            
+        filename = wp["filename"]
+        if self._cache.is_wallpaper_cached(filename):
+            wp_path = self._cache.get_wallpaper_path(filename)
+            import subprocess
+            subprocess.Popen(["qlmanage", "-p", str(wp_path)], 
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
+            self.notify("Please wait for preview to download first", severity="warning")
 
     def action_random_wallpaper(self) -> None:
         """Set a random wallpaper from current list."""

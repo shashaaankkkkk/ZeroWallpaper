@@ -43,4 +43,4 @@ zerowallpaper
 ## Configuration
 
 Config is stored at `~/.zerowallpaper/config.json`. Set `GITHUB_TOKEN` environment variable for higher API rate limits.
-# ZeroWallpaper
+

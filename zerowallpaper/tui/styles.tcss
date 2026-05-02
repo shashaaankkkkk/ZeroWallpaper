@@ -175,7 +175,7 @@ ListView:focus > ListItem.-highlight .wp-tags {
 /* ===== PREVIEW PANEL ===== */
 
 #preview-panel {
-    width: 50;
+    width: 2fr;
     background: #12121a;
     border-left: solid #27273a;
     height: 100%;

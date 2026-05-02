@@ -87,6 +87,10 @@ class WallpaperListItem(ListItem):
 class WallpaperList(Widget):
     """Scrollable list of wallpapers with keyboard navigation."""
 
+    BINDINGS = [
+        ("enter", "activate_wallpaper", "Set Wallpaper"),
+    ]
+
     current_index = reactive(-1)
 
     def __init__(self, **kwargs) -> None:
@@ -126,10 +130,11 @@ class WallpaperList(Widget):
         """Update favorites set and refresh display."""
         self._favorites = favorites
 
-    def on_list_view_selected(self, event: ListView.Selected) -> None:
-        """Handle item activation (Enter)."""
-        if isinstance(event.item, WallpaperListItem):
-            self.post_message(WallpaperActivated(event.item.wallpaper))
+    def action_activate_wallpaper(self) -> None:
+        """Handle explicit Enter key to set wallpaper."""
+        wp = self.get_current_wallpaper()
+        if wp:
+            self.post_message(WallpaperActivated(wp))
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
         """Handle item highlight change."""

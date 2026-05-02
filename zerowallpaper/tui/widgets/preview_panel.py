@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import time
 from io import BytesIO
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,11 @@ try:
     HAS_PILLOW = True
 except ImportError:
     HAS_PILLOW = False
+
+from zerowallpaper.tui.sixel_detector import supports_sixel
+from zerowallpaper.tui.sixel_encoder import encode_sixel_cached
+from zerowallpaper.tui.widgets.sixel_image import SixelImage
+from zerowallpaper.tui.widgets.chafa_image import generate_chafa_image
 
 
 class HalfBlockImage:
@@ -104,11 +110,11 @@ class HalfBlockImage:
         h = len(self._pixels)
         w = len(self._pixels[0]) if h > 0 else 0
 
-        for y in range(0, h - 1, 2):
+        for y in range(0, h, 2):
             segments = []
             for x in range(w):
                 top = self._pixels[y][x]
-                bot = self._pixels[y + 1][x] if y + 1 < h else (0, 0, 0)
+                bot = self._pixels[y + 1][x] if y + 1 < h else top
 
                 fg = f"rgb({top[0]},{top[1]},{top[2]})"
                 bg = f"rgb({bot[0]},{bot[1]},{bot[2]})"
@@ -127,11 +133,18 @@ class PreviewPanel(Widget):
         super().__init__(**kwargs)
         self._current_wp: dict[str, Any] | None = None
         self._loading = False
+        self._last_click_time = 0.0
 
     async def on_click(self) -> None:
-        """Open the image when the preview panel is clicked."""
-        if self._current_wp:
-            self.app.action_view_image()
+        """Open the image when the preview panel is double-clicked."""
+        current_time = time.time()
+        # 0.5 seconds is a standard double-click window
+        if current_time - self._last_click_time < 0.5:
+            if self._current_wp:
+                self.app.action_view_image()
+            self._last_click_time = 0.0
+        else:
+            self._last_click_time = current_time
 
     def compose(self) -> ComposeResult:
         yield Static(" ◉ PREVIEW", classes="panel-title")
@@ -161,12 +174,22 @@ class PreviewPanel(Widget):
         self._clear_container()
         self._clear_meta()
         container = self.query_one("#preview-image-container", Vertical)
+        
+        if not container.is_mounted:
+            self.call_later(self.show_placeholder, text)
+            return
+            
         container.mount(Static(f"  {text}"))
 
     def show_loading(self) -> None:
         """Show loading state."""
         self._clear_container()
         container = self.query_one("#preview-image-container", Vertical)
+        
+        if not container.is_mounted:
+            self.call_later(self.show_loading)
+            return
+            
         container.mount(Static("  ◌ Loading preview..."))
 
     def show_preview(
@@ -179,17 +202,34 @@ class PreviewPanel(Widget):
         self._clear_container()
         container = self.query_one("#preview-image-container", Vertical)
 
+        if not container.is_mounted:
+            self.call_later(self.show_preview, image_data, wallpaper)
+            return
+
         # Calculate available size
         avail_w = max(10, container.size.width - 2)
         avail_h = max(5, container.size.height - 2)
 
         if HAS_PILLOW:
-            img_renderable = HalfBlockImage(
-                image_data=image_data,
-                width=avail_w,
-                height=avail_h,
-            )
-            container.mount(Static(img_renderable))
+            if supports_sixel():
+                payload = encode_sixel_cached(image_data, avail_w, avail_h)
+                if payload:
+                    container.mount(SixelImage(payload, width=avail_w, height=avail_h))
+                else:
+                    container.mount(Static("  Sixel encoding failed"))
+            else:
+                # Try Chafa for ultra-high fidelity block rendering
+                chafa_renderable = generate_chafa_image(image_data, avail_w, avail_h)
+                if chafa_renderable:
+                    container.mount(Static(chafa_renderable))
+                else:
+                    # Final fallback to standard half-blocks
+                    img_renderable = HalfBlockImage(
+                        image_data=image_data,
+                        width=avail_w,
+                        height=avail_h,
+                    )
+                    container.mount(Static(img_renderable))
         else:
             container.mount(Static("  Pillow required\n  for previews"))
 
@@ -206,16 +246,33 @@ class PreviewPanel(Widget):
         self._clear_container()
         container = self.query_one("#preview-image-container", Vertical)
 
+        if not container.is_mounted:
+            self.call_later(self.show_cached_preview, image_path, wallpaper)
+            return
+
         avail_w = max(10, container.size.width - 2)
         avail_h = max(5, container.size.height - 2)
 
         if HAS_PILLOW:
-            img_renderable = HalfBlockImage(
-                image_path=image_path,
-                width=avail_w,
-                height=avail_h,
-            )
-            container.mount(Static(img_renderable))
+            if supports_sixel():
+                # lru_cache needs an immutable arg for the file, so we use string path
+                payload = encode_sixel_cached(str(image_path), avail_w, avail_h)
+                if payload:
+                    container.mount(SixelImage(payload, width=avail_w, height=avail_h))
+                else:
+                    container.mount(Static("  Sixel encoding failed"))
+            else:
+                # Try Chafa for ultra-high fidelity block rendering
+                chafa_renderable = generate_chafa_image(str(image_path), avail_w, avail_h)
+                if chafa_renderable:
+                    container.mount(Static(chafa_renderable))
+                else:
+                    img_renderable = HalfBlockImage(
+                        image_path=image_path,
+                        width=avail_w,
+                        height=avail_h,
+                    )
+                    container.mount(Static(img_renderable))
         else:
             container.mount(Static("  Pillow required"))
 
@@ -246,3 +303,6 @@ class PreviewPanel(Widget):
         cat = wp.get("category", "")
         if cat:
             meta.mount(Static(f"  Category: {cat.title()}"))
+
+        # Hint
+        meta.mount(Static("\n  [dim i]Hint: Press 'v' or double-click\n  to view in High Quality[/dim i]"))

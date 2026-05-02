@@ -253,13 +253,8 @@ class ZeroWallpaperApp(App):
         )
 
     def on_wallpaper_activated(self, event: WallpaperActivated) -> None:
-        """Handle wallpaper activation (Enter) — open HD image preview."""
-        self.action_view_image()
-        self.notify(
-            "Press 's' to set as desktop wallpaper",
-            title=event.wallpaper["filename"],
-            severity="information",
-        )
+        """Handle wallpaper activation (Enter) — set as wallpaper."""
+        self.action_set_wallpaper()
 
     async def _load_preview(self, wallpaper: dict[str, Any]) -> None:
         """Load and display wallpaper preview."""

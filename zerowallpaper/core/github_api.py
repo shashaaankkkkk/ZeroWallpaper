@@ -203,3 +203,4 @@ class GitHubFetcher:
             }
         except GitHubAPIError:
             return {"limit": 60, "remaining": -1, "reset": 0}
+    

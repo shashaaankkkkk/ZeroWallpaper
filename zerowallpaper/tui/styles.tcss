@@ -233,19 +233,21 @@ HomeScreen {
 }
 
 #home-container {
-    width: 60;
+    width: 80;
     height: auto;
     padding: 2 4;
     align: center middle;
 }
 
-#home-title {
+#home-ascii {
     text-align: center;
     color: #06b6d4;
     text-style: bold;
     width: 100%;
     margin-bottom: 1;
 }
+
+
 
 .home-subtitle {
     text-align: center;
@@ -258,6 +260,11 @@ HomeScreen {
     color: #a855f7;
     width: 100%;
     margin-bottom: 2;
+}
+
+.home-link:hover {
+    text-style: underline;
+    color: #c084fc;
 }
 
 #home-buttons {

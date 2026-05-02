@@ -1,6 +1,13 @@
 <div align="center">
   <img src="assets/homescreen.png" alt="ZeroWallpaper Logo" width="200" />
-  <h1 align="center">ZeroWallpaper 🌌</h1>
+  <pre>
+  _____               __          __   _ _                             
+ |__  /___ _ __ ___  \ \      / /_ _| | |_ __   __ _ _ __   ___ _ __ 
+   / // _ \ '__/ _ \  \ \ /\ / / _` | | | '_ \ / _` | '_ \ / _ \ '__|
+  / /|  __/ | | (_) |  \ V  V / (_| | | | |_) | (_| | |_) |  __/ |   
+ /____\___|_|  \___/    \_/\_/ \__,_|_|_| .__/ \__,_| .__/ \___|_|   
+                                        |_|         |_|              
+  </pre>
   <p align="center">
     <strong>The ultimate terminal-based aesthetic wallpaper engine.</strong>
   </p>

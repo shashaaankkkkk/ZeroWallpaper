@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/homescreen.png" alt="ZeroWallpaper Logo" width="200" />
+
   <pre>
 █████ █████ ████   ███  █   █  ███  █     █     ████   ███  ████  █████ ████  
    █  █     █   █ █   █ █   █ █   █ █     █     █   █ █   █ █   █ █     █   █ 

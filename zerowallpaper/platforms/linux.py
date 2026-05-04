@@ -50,13 +50,16 @@ class LinuxBackend(WallpaperBackend):
             return False
 
     async def _run(self, *args: str) -> bool:
-        proc = await asyncio.create_subprocess_exec(
-            *args,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
-        await proc.communicate()
-        return proc.returncode == 0
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *args,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await proc.communicate()
+            return proc.returncode == 0
+        except FileNotFoundError:
+            return False
 
     async def _set_gnome(self, uri: str) -> bool:
         r1 = await self._run(
@@ -70,6 +73,11 @@ class LinuxBackend(WallpaperBackend):
         return r1 or r2
 
     async def _set_kde(self, path: str) -> bool:
+        # 1. Try modern KDE utility
+        if await self._run("plasma-apply-wallpaperimage", path):
+            return True
+
+        # 2. Try D-Bus script fallback
         script = f"""
 var allDesktops = desktops();
 for (i=0; i<allDesktops.length; i++) {{
@@ -79,10 +87,15 @@ for (i=0; i<allDesktops.length; i++) {{
     d.writeConfig("Image", "file://{path}");
 }}
 """
-        return await self._run(
-            "qdbus", "org.kde.plasmashell", "/PlasmaShell",
-            "org.kde.PlasmaShell.evaluateScript", script,
-        )
+        # Try different qdbus names (Plasma 6 uses qdbus-qt6 on some distros)
+        for qdbus in ["qdbus-qt6", "qdbus", "qdbus-qt5"]:
+            if await self._run(
+                qdbus, "org.kde.plasmashell", "/PlasmaShell",
+                "org.kde.PlasmaShell.evaluateScript", script,
+            ):
+                return True
+
+        return False
 
     async def _set_xfce(self, path: str) -> bool:
         return await self._run(

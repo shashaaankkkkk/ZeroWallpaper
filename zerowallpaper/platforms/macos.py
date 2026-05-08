@@ -23,19 +23,45 @@ class MacOSBackend(WallpaperBackend):
         # Ensure the file is in a macOS-compatible format
         abs_path = await self._ensure_compatible_format(abs_path)
 
-        # Method 1: Finder (most reliable on macOS Sequoia / Sonoma)
+        # Method 1: Swift Bridge (Most robust, bypasses many permission issues)
+        if await self._set_via_swift_bridge(abs_path):
+            return True
+
+        # Method 2: Finder (reliable fallback)
         if await self._set_via_finder(abs_path):
             return True
 
-        # Method 2: System Events (fallback for older macOS)
+        # Method 3: System Events (fallback for older macOS)
         if await self._set_via_system_events(abs_path):
             return True
 
-        # Method 3: sqlite + killall Dock (works on macOS 14+ even without permissions)
+        # Method 4: sqlite + killall Dock (last resort)
         if await self._set_via_sqlite(abs_path):
             return True
 
         return False
+
+    async def _set_via_swift_bridge(self, abs_path: str) -> bool:
+        """Set wallpaper using a small Swift script via the CLI.
+        
+        This uses the native NSWorkspace API which is more reliable than 
+        AppleScript on modern macOS.
+        """
+        script = f"""
+import AppKit
+let url = URL(fileURLWithPath: "{abs_path}")
+try? NSWorkspace.shared.setDesktopImageURL(url, for: NSScreen.main!, options: [:])
+"""
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "swift", "-e", script,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await proc.communicate()
+            return proc.returncode == 0
+        except Exception:
+            return False
 
     async def _set_via_finder(self, abs_path: str) -> bool:
         """Set wallpaper using Finder (works on macOS 14+)."""

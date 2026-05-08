@@ -14,9 +14,9 @@ from rich.style import Style
 from rich.text import Text
 
 from textual.app import ComposeResult
-from textual.containers import Vertical, VerticalScroll
+from textual.containers import Vertical, VerticalScroll, Horizontal
 from textual.widget import Widget
-from textual.widgets import Static, Label
+from textual.widgets import Static, Label, Button
 
 try:
     from PIL import Image
@@ -26,7 +26,7 @@ except ImportError:
 
 from zerowallpaper.tui.sixel_detector import supports_sixel
 from zerowallpaper.tui.sixel_encoder import encode_sixel_cached
-from zerowallpaper.tui.widgets.sixel_image import SixelImage
+from zerowallpaper.tui.widgets.sixel_image import SixelImageRenderer
 from zerowallpaper.tui.widgets.chafa_image import generate_chafa_image
 
 
@@ -149,6 +149,10 @@ class PreviewPanel(Widget):
     def compose(self) -> ComposeResult:
         yield Static(" ◉ PREVIEW", classes="panel-title")
         yield Vertical(id="preview-image-container")
+        with Horizontal(id="preview-actions"):
+            yield Button("Set", id="btn-set-wp", variant="primary")
+            yield Button("+Playlist", id="btn-add-playlist", variant="success")
+            yield Button("Fav", id="btn-toggle-fav")
         yield Vertical(id="preview-meta")
 
     def on_mount(self) -> None:
@@ -196,6 +200,7 @@ class PreviewPanel(Widget):
         self,
         image_data: bytes,
         wallpaper: dict[str, Any],
+        is_in_playlist: bool = False,
     ) -> None:
         """Render image preview and metadata."""
         self._current_wp = wallpaper
@@ -203,7 +208,7 @@ class PreviewPanel(Widget):
         container = self.query_one("#preview-image-container", Vertical)
 
         if not container.is_mounted:
-            self.call_later(self.show_preview, image_data, wallpaper)
+            self.call_later(self.show_preview, image_data, wallpaper, is_in_playlist)
             return
 
         # Calculate available size
@@ -214,7 +219,7 @@ class PreviewPanel(Widget):
             if supports_sixel():
                 payload = encode_sixel_cached(image_data, avail_w, avail_h)
                 if payload:
-                    container.mount(SixelImage(payload, width=avail_w, height=avail_h))
+                    container.mount(SixelImageRenderer(payload, width=avail_w, height=avail_h))
                 else:
                     container.mount(Static("  Sixel encoding failed"))
             else:
@@ -234,12 +239,13 @@ class PreviewPanel(Widget):
             container.mount(Static("  Pillow required\n  for previews"))
 
         # Update metadata
-        self._update_metadata(wallpaper)
+        self._update_metadata(wallpaper, is_in_playlist)
 
     def show_cached_preview(
         self,
         image_path: Path,
         wallpaper: dict[str, Any],
+        is_in_playlist: bool = False,
     ) -> None:
         """Render preview from cached file."""
         self._current_wp = wallpaper
@@ -247,7 +253,7 @@ class PreviewPanel(Widget):
         container = self.query_one("#preview-image-container", Vertical)
 
         if not container.is_mounted:
-            self.call_later(self.show_cached_preview, image_path, wallpaper)
+            self.call_later(self.show_cached_preview, image_path, wallpaper, is_in_playlist)
             return
 
         avail_w = max(10, container.size.width - 2)
@@ -258,7 +264,7 @@ class PreviewPanel(Widget):
                 # lru_cache needs an immutable arg for the file, so we use string path
                 payload = encode_sixel_cached(str(image_path), avail_w, avail_h)
                 if payload:
-                    container.mount(SixelImage(payload, width=avail_w, height=avail_h))
+                    container.mount(SixelImageRenderer(payload, width=avail_w, height=avail_h))
                 else:
                     container.mount(Static("  Sixel encoding failed"))
             else:
@@ -276,16 +282,17 @@ class PreviewPanel(Widget):
         else:
             container.mount(Static("  Pillow required"))
 
-        self._update_metadata(wallpaper)
+        self._update_metadata(wallpaper, is_in_playlist)
 
-    def _update_metadata(self, wp: dict[str, Any]) -> None:
+    def _update_metadata(self, wp: dict[str, Any], is_in_playlist: bool = False) -> None:
         """Update the metadata section below the preview."""
         self._clear_meta()
         meta = self.query_one("#preview-meta", Vertical)
 
         # Filename
         fn = wp.get("filename", "unknown")
-        meta.mount(Static(f"  [b]{fn}[/b]"))
+        playlist_indicator = " [cyan]♬ IN PLAYLIST[/cyan]" if is_in_playlist else ""
+        meta.mount(Static(f"  [b]{fn}[/b]{playlist_indicator}"))
 
         # Tags
         tags = wp.get("tags", [])

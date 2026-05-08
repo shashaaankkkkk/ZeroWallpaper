@@ -29,16 +29,41 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Import here to avoid slow startup for --help/--version
-    from zerowallpaper.core.config import AppConfig
+    # Launch the TUI or handle subcommands
+    if len(sys.argv) > 1 and sys.argv[1] == "daemon":
+        from zerowallpaper.scheduler import daemon
+        if len(sys.argv) > 2:
+            cmd = sys.argv[2]
+            if cmd == "start":
+                if daemon.is_running():
+                    print("Daemon is already running.")
+                else:
+                    daemon.start_daemon_detached()
+                    print("ZeroWallpaper daemon started in background.")
+            elif cmd == "stop":
+                if daemon.stop_daemon():
+                    print("ZeroWallpaper daemon stopped.")
+                else:
+                    print("Daemon is not running.")
+            elif cmd == "status":
+                pid = daemon.is_running()
+                if pid:
+                    print(f"Daemon is running (PID: {pid})")
+                else:
+                    print("Daemon is not running.")
+            else:
+                print("Usage: zerowallpaper daemon [start|stop|status]")
+        else:
+            print("Usage: zerowallpaper daemon [start|stop|status]")
+        return
 
+    from zerowallpaper.core.config import AppConfig
     config = AppConfig.load()
 
     if args.token:
         config.github_token = args.token
         config.save()
 
-    # Launch the TUI
     from zerowallpaper.tui.app import ZeroWallpaperApp
 
     app = ZeroWallpaperApp(

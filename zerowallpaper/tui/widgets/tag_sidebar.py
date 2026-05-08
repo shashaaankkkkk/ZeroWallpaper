@@ -34,9 +34,9 @@ class TagItem(ListItem):
         yield Label(self._get_label_text())
 
     def _get_label_text(self) -> str:
-        marker = "●" if self.selected else "○"
+        marker = "[X]" if self.selected else "[ ]"
         count_str = f" ({self.tag_count})" if self.tag_count > 0 else ""
-        return f" {marker} {self.tag_name}{count_str}"
+        return f" {marker} {self.tag_name.upper()}{count_str}"
 
     def watch_selected(self, value: bool) -> None:
         try:
@@ -65,8 +65,8 @@ class SpecialFilterItem(ListItem):
         yield Label(self._get_label_text())
 
     def _get_label_text(self) -> str:
-        marker = "▸" if self.selected else " "
-        return f" {marker} {self.icon} {self.filter_label}"
+        marker = "> " if self.selected else "  "
+        return f" {marker}{self.filter_label.upper()}"
 
     def watch_selected(self, value: bool) -> None:
         try:
@@ -87,16 +87,17 @@ class TagSidebar(Widget):
         self._tag_items: list[TagItem] = []
 
     def compose(self) -> ComposeResult:
-        yield Static(" ⬡ FILTERS", classes="sidebar-title")
+        yield Static(" FILTERS ", classes="sidebar-title")
         with ListView(id="tag-list"):
             # Special filters
-            yield SpecialFilterItem("All", "◈", "all", id="filter-all")
-            yield SpecialFilterItem("Favorites", "★", "favorites", id="filter-fav")
-            yield SpecialFilterItem("Cached", "💾", "cached", id="filter-cached")
-            yield SpecialFilterItem("Recent", "◷", "recent", id="filter-recent")
+            yield SpecialFilterItem("All", "", "all", id="filter-all")
+            yield SpecialFilterItem("Playlist", "", "playlist", id="filter-playlist")
+            yield SpecialFilterItem("Favorites", "", "favorites", id="filter-fav")
+            yield SpecialFilterItem("Cached", "", "cached", id="filter-cached")
+            yield SpecialFilterItem("Recent", "", "recent", id="filter-recent")
 
             # Header is just a disabled list item
-            yield ListItem(Static(" ─── TAGS ───", classes="tag-section-header"), disabled=True)
+            yield ListItem(Static(" TAGS ", classes="tag-section-header"), disabled=True)
 
     def on_mount(self) -> None:
         # Select "All" by default

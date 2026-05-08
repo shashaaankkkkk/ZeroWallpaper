@@ -67,19 +67,25 @@ class WallpaperListItem(ListItem):
     """Single wallpaper entry in the list."""
 
     def __init__(
-        self, wallpaper: dict[str, Any], is_fav: bool = False, **kwargs
+        self, 
+        wallpaper: dict[str, Any], 
+        is_fav: bool = False, 
+        is_in_playlist: bool = False,
+        **kwargs
     ) -> None:
         super().__init__(**kwargs)
         self.wallpaper = wallpaper
         self.is_fav = is_fav
+        self.is_in_playlist = is_in_playlist
         self.add_class("wallpaper-item")
 
     def compose(self) -> ComposeResult:
         name = clean_filename(self.wallpaper["filename"])
         tags = format_tags(self.wallpaper.get("tags", []))
-        fav = " ★" if self.is_fav else ""
+        fav = " [FAV]" if self.is_fav else ""
+        playlist = " [PL]" if self.is_in_playlist else ""
 
-        yield Static(f" ▸ {name}{fav}", classes="wp-name")
+        yield Static(f" {name}{fav}{playlist}", classes="wp-name")
         if tags:
             yield Static(f"    {tags}", classes="wp-tags")
 
@@ -107,19 +113,27 @@ class WallpaperList(Widget):
         self._list_view = self.query_one("#wallpaper-list", ListView)
 
     def set_wallpapers(
-        self, wallpapers: list[dict[str, Any]], favorites: set[str] | None = None
+        self, 
+        wallpapers: list[dict[str, Any]], 
+        favorites: set[str] | None = None,
+        playlist: set[str] | None = None
     ) -> None:
         """Update the wallpaper list."""
         self._wallpapers = wallpapers
         if favorites is not None:
             self._favorites = favorites
+        if playlist is not None:
+            self._playlist_set = playlist
+        else:
+            self._playlist_set = getattr(self, "_playlist_set", set())
 
         lv = self.query_one("#wallpaper-list", ListView)
         lv.clear()
 
         for wp in wallpapers:
             is_fav = wp["filename"] in self._favorites
-            item = WallpaperListItem(wp, is_fav=is_fav)
+            is_in = wp["filename"] in self._playlist_set
+            item = WallpaperListItem(wp, is_fav=is_fav, is_in_playlist=is_in)
             lv.append(item)
 
         # Select first item if available

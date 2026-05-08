@@ -16,6 +16,7 @@ class StatusBar(Widget):
         self._mode = "Manual"
         self._filter_count = 0
         self._cache_count = 0
+        self._playlist_count = 0
         self._network = "online"
 
     def compose(self) -> ComposeResult:
@@ -38,6 +39,10 @@ class StatusBar(Widget):
         self._cache_count = count
         self._update()
 
+    def set_playlist_count(self, count: int) -> None:
+        self._playlist_count = count
+        self._update()
+
     def set_network(self, status: str) -> None:
         self._network = status
         self._update()
@@ -45,19 +50,17 @@ class StatusBar(Widget):
     def _update(self) -> None:
         try:
             info = self.query_one("#status-info", Static)
-            mode_icon = "⚡" if self._mode != "Manual" else "◈"
-            net_icon = "●" if self._network == "online" else "○"
-
             info.update(
-                f" {mode_icon} {self._mode}"
-                f"  │  ⏳ Filters: {self._filter_count}"
-                f"  │  📦 Cache: {self._cache_count}"
-                f"  │  {net_icon} {self._network.title()}"
+                f" {self._mode.upper()}"
+                f"  │  FILTERS: {self._filter_count}"
+                f"  │  PLAYLIST: {self._playlist_count}"
+                f"  │  CACHE: {self._cache_count}"
+                f"  │  {self._network.upper()}"
             )
 
             shortcuts = self.query_one("#status-shortcuts", Static)
             shortcuts.update(
-                "↑↓:nav  s:set  v:view  /:search  "
+                "s:set  v:view  p:playlist  i:cycle  /:search  "
                 "r:random  a:auto  Tab:panel  q:quit"
             )
         except Exception:

@@ -115,3 +115,31 @@ class CacheManager:
             "size_mb": round(self.get_cache_size_mb(), 1),
             "has_index": self.index_path.exists(),
         }
+
+    def cleanup(self, max_age_days: int = 7) -> int:
+        """Clean up files older than max_age_days.
+        
+        Returns the number of files deleted.
+        """
+        deleted_count = 0
+        now = time.time()
+        max_age_seconds = max_age_days * 86400
+
+        # Directories to clean
+        dirs_to_clean = [self.config.wallpapers_dir, self.config.thumbnails_dir]
+
+        for directory in dirs_to_clean:
+            if not directory.exists():
+                continue
+            
+            for f in directory.glob("*"):
+                if f.is_file():
+                    # If file is older than max_age, delete it
+                    if now - f.stat().st_mtime > max_age_seconds:
+                        try:
+                            f.unlink()
+                            deleted_count += 1
+                        except Exception:
+                            pass
+        
+        return deleted_count
